@@ -1,20 +1,203 @@
-<style lang="less">
-</style>
 <template>
-  <view class="container">
-    Hello world
+  <view class="contain">
+    <swiper indicator-dots autoplay circular>
+      <swiper-item wx:for="{{swiperList}}" wx:key="goods_id">
+        <navigator url="/pages/goods_detail?goods_id={{item.goods_id}}">
+          <image src="{{item.image_src}}"></image>
+        </navigator>
+      </swiper-item>
+    </swiper>
+
+    <!-- 导航 -->
+    <view class="nav">
+      <navigator
+        class="nav-item"
+        url="{{index === 0 ? item.navigator_url : '/pages/list?keyword='+item.keyword}}"
+        open-type="{{item.open_type}}"
+        wx:for="{{navList}}"
+        wx:key="name">
+        <image src="{{item.image_src}}"></image>
+      </navigator>
+    </view>
+
+    <!-- 楼层 -->
+    <view class="floor">
+      <view class="floor-item" wx:for="{{floorList}}" wx:key="id">
+        <view class="floor-title">
+          <image src="{{item.floor_title.image_src}}"></image>
+        </view>
+        <view class="floor-content">
+          <view class="left">
+            <navigator url="/pages/list?keyword={{item.product_list[0].keyword}}">
+              <image src="{{item.product_list[0].image_src}}"></image>
+            </navigator>
+          </view>
+          <view class="right">
+            <!-- <image src="{{item.product_list[1].image_src}}"></image>
+            <image src="{{item.product_list[2].image_src}}"></image>
+            <image src="{{item.product_list[3].image_src}}"></image>
+            <image src="{{item.product_list[4].image_src}}"></image> -->
+            <navigator
+              url="/pages/list?keyword={{image.keyword}}"
+              wx:for="{{item.product_list}}"
+              wx:if="{{i !== 0}}"
+              wx:key="name"
+              wx:for-item="image"
+              wx:for-index="i">
+              <image src="{{image.image_src}}"></image>
+            </navigator>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
-  import wepy from 'wepy'
+import wepy from 'wepy';
 
-  export default class Index extends wepy.page {
-    config = {
-      navigationBarTitleText: '测试wepy'
-    }
-    onLoad() {
-      console.log('onLoad')
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '首页'
+  };
+
+  // 在wepy中提供data数据，写法注意 不是 data: {}
+  //  data = {}  写法同config
+
+  // 获取data中的数据， 原来 this.data.xxx
+  // 在wepy中，直接通过 this.xxx 就可以获取到数据
+  // 在wepy中，直接赋值就可以实现视图更新，不需要手动调用setData方法，但是如果是在异步函数中操作数据的话，需要调用$apply();
+  data = {
+    swiperList: [],
+    navList: [],
+    floorList: []
+  };
+
+  onLoad() {
+    this.getSwiperList();
+    this.getNavList();
+    this.getFloorList();
+  }
+
+  async getSwiperList() {
+    /* wx.request({
+        url: "https://itjustfun.cn/api/public/v1/home/swiperdata",
+        success: res => {
+          this.swiperList = res.data.data;
+          this.$apply();
+        }
+      }); */
+
+    // 在wepy中，wepy对所有的方法都进行了封装，尤其是异步方法，是直接promise的。
+    // 所有的wx.xxx 都可以使用 wepy.xxx的形式来调用
+    // wepy.request({
+    //   url: "https://itjustfun.cn/api/public/v1/home/swiperdata"
+    // }).then(res => {
+    //   this.swiperList = res.data.data;
+    //   this.$apply();
+    // })
+
+    // 更换成async写法
+    let res = await wepy.request({
+      url: 'https://itjustfun.cn/api/public/v1/home/swiperdata'
+    });
+    this.swiperList = res.data.data;
+    this.$apply();
+  }
+
+  async getNavList() {
+    let res = await wepy.request({
+      url: 'https://itjustfun.cn/api/public/v1/home/catitems'
+    });
+
+    this.navList = res.data.data;
+    this.$apply();
+  }
+
+  async getFloorList() {
+    let res = await wepy.request({
+      url: 'https://itjustfun.cn/api/public/v1/home/floordata'
+    });
+    // 手动添加id，用于key
+    res.data.data.forEach((item,index) => item.id=++index);
+    this.floorList = res.data.data;
+    this.$apply();
+  }
+}
+</script>
+<style lang="less">
+swiper {
+  width: 750rpx;
+  height: 340rpx;
+
+  image {
+    width: 750rpx;
+    height: 340rpx;
+  }
+}
+
+// 导航
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24rpx 0 29rpx 0;
+  &-item {
+    flex: 1;
+    text-align: center;
+    image {
+      width: 128rpx;
+      height: 128rpx;
     }
   }
-</script>
+}
+
+// 楼层
+.floor {
+  &-title {
+    background-color: #eee;
+    padding-top: 30rpx;
+    image {
+      width: 750rpx;
+      height: 59rpx;
+    }
+  }
+
+  &-content {
+    padding: 20rpx 16rpx;
+    display: flex;
+    box-sizing: border-box;
+    image {
+      vertical-align: middle;
+    }
+    navigator{
+      display: inline-block;
+    }
+    .left {
+      image {
+        width: 232rpx;
+        height: 386rpx;
+        margin-right: 10rpx;
+      }
+    }
+
+    .right {
+      navigator{
+        &:nth-child(-n + 2) {
+          // 前两张图片
+          margin-bottom: 10rpx;
+        }
+        &:nth-child(odd) {
+          // 一三
+          margin-right: 10rpx;
+        }
+      }
+
+      image {
+        width: 233rpx;
+        height: 188rpx;
+      }
+    }
+  }
+}
+</style>

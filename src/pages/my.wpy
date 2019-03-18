@@ -1,0 +1,20 @@
+<style lang="less">
+</style>
+<template>
+  <view class="container">
+    随便写的
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class My extends wepy.page {
+    config = {
+      navigationBarTitleText: '测试wepy'
+    }
+    onLoad() {
+      console.log('onLoad')
+    }
+  }
+</script>

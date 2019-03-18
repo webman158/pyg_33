@@ -57,3 +57,16 @@ script(config部分)    ==>  对应的json文件   json文件
 
 
 在wepy框架中，小程序页面的四个组成部分，现在都在一个wpy文件中
+
+
+## 使用git 管理项目
+1. git init
+2. git status
+3. git add .
+4. git commit -m "提交信息"
+5. git remote add origin git@github.com:webman158/pyg_33.git
+6. git push -u origin master
+
+
+## 配置pages + window
+注意： 在app.wpy文件中 config 部分中配置的
